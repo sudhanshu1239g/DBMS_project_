@@ -1,0 +1,147 @@
+CREATE DATABASE E_LEARNING;
+USE  E_LEARNING;
+CREATE TABLE Students (
+    StudentID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    Email VARCHAR(100) UNIQUE,
+    DateOfBirth DATE
+);
+
+CREATE TABLE Instructors (
+    InstructorID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    Email VARCHAR(100) UNIQUE
+);
+
+CREATE TABLE Courses (
+    CourseID INT PRIMARY KEY AUTO_INCREMENT,
+    CourseName VARCHAR(100),
+    CourseDescription TEXT,
+    InstructorID INT,
+    FOREIGN KEY (InstructorID) REFERENCES Instructors(InstructorID)
+);
+
+CREATE TABLE Enrollments (
+    EnrollmentID INT PRIMARY KEY AUTO_INCREMENT,
+    StudentID INT,
+    CourseID INT,
+    EnrollmentDate DATE,
+    FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
+    FOREIGN KEY (CourseID) REFERENCES Courses(CourseID),
+    UNIQUE (StudentID, CourseID)  -- Composite unique key
+);
+
+CREATE TABLE Assignments (
+    AssignmentID INT PRIMARY KEY AUTO_INCREMENT,
+    CourseID INT,
+    AssignmentTitle VARCHAR(100),
+    AssignmentDescription TEXT,
+    DueDate DATE,
+    FOREIGN KEY (CourseID) REFERENCES Courses(CourseID)
+);
+
+-- Insert data into Students table
+INSERT INTO Students (FirstName, LastName, Email, DateOfBirth)
+VALUES
+('Amit', 'Sharma', 'amit.sharma@example.com', '2000-01-15'),
+('Priya', 'Singh', 'priya.singh@example.com', '1999-05-23'),
+('Ravi', 'Kumar', 'ravi.kumar@example.com', '2001-07-09'),
+('Anjali', 'Patel', 'anjali.patel@example.com', '1998-11-25'),
+('Sunita', 'Rao', 'sunita.rao@example.com', '2000-03-17');
+
+-- Insert data into Instructors table
+INSERT INTO Instructors (FirstName, LastName, Email)
+VALUES
+('Arun', 'Mehta', 'arun.mehta@example.com'),
+('Neha', 'Verma', 'neha.verma@example.com'),
+('Suresh', 'Gupta', 'suresh.gupta@example.com'),
+('Pooja', 'Reddy', 'pooja.reddy@example.com'),
+('Vikram', 'Desai', 'vikram.desai@example.com');
+
+-- Insert data into Courses table
+INSERT INTO Courses (CourseName, CourseDescription, InstructorID)
+VALUES
+('Database Systems', 'Learn about relational databases', 1),
+('Web Development', 'Learn to build modern web applications', 2),
+('Data Structures', 'Introduction to data structures', 3),
+('Machine Learning', 'Basics of machine learning', 4),
+('Software Engineering', 'Principles of software engineering', 5);
+
+-- Insert data into Enrollments table
+INSERT INTO Enrollments (StudentID, CourseID, EnrollmentDate)
+VALUES
+(1, 1, '2023-01-10'),
+(2, 1, '2023-01-12'),
+(3, 2, '2023-01-15'),
+(4, 3, '2023-01-20'),
+(5, 4, '2023-02-01');
+
+-- Insert data into Assignments table
+INSERT INTO Assignments (CourseID, AssignmentTitle, AssignmentDescription, DueDate)
+VALUES
+(1, 'Homework 1', 'Introduction to SQL', '2023-02-15'),
+(1, 'Homework 2', 'Advanced SQL Queries', '2023-03-01'),
+(2, 'Project 1', 'Build a simple web app', '2023-02-20'),
+(3, 'Assignment 1', 'Implement data structures', '2023-03-10'),
+(4, 'Assignment 1', 'Basic ML algorithms', '2023-03-25'),
+(5, 'Homework 1', 'Software design patterns','2023-04-01');
+
+SELECT Courses.CourseName, Students.FirstName, Students.LastName
+FROM Enrollments
+JOIN Students ON Enrollments.StudentID = Students.StudentID
+JOIN Courses ON Enrollments.CourseID = Courses.CourseID
+ORDER BY Courses.CourseName, Students.LastName, Students.FirstName;
+
+SELECT Courses.CourseName, COUNT(Enrollments.StudentID) AS NumberOfStudents
+FROM Courses
+LEFT JOIN Enrollments ON Courses.CourseID = Enrollments.CourseID
+GROUP BY Courses.CourseName
+ORDER BY NumberOfStudents DESC;
+
+SELECT Courses.CourseName, Instructors.FirstName, Instructors.LastName
+FROM Courses
+JOIN Instructors ON Courses.InstructorID = Instructors.InstructorID
+ORDER BY Courses.CourseName;
+
+
+SELECT Courses.CourseName, 
+    COUNT(Assignments.AssignmentID) AS NumberOfAssignments
+FROM Courses
+LEFT JOIN Assignments ON Courses.CourseID = Assignments.CourseID
+GROUP BY Courses.CourseName
+ORDER BY NumberOfAssignments DESC;
+
+
+SELECT 
+    Students.FirstName AS StudentFirstName,
+    Students.LastName AS StudentLastName,
+    Courses.CourseName,
+    Instructors.FirstName AS InstructorFirstName,
+    Instructors.LastName AS InstructorLastName,
+    Enrollments.EnrollmentDate
+FROM 
+    Enrollments
+JOIN 
+    Students ON Enrollments.StudentID = Students.StudentID
+JOIN 
+    Courses ON Enrollments.CourseID = Courses.CourseID
+JOIN 
+    Instructors ON Courses.InstructorID = Instructors.InstructorID
+ORDER BY 
+    Students.LastName, Students.FirstName, Courses.CourseName;
+    
+
+SELECT 
+    Students.FirstName, 
+    Students.LastName, 
+    COUNT(Enrollments.CourseID) AS TotalEnrollments
+FROM 
+    Students
+JOIN 
+    Enrollments ON Students.StudentID = Enrollments.StudentID
+GROUP BY 
+    Students.StudentID
+ORDER BY 
+    TotalEnrollments DESC;
